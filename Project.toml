@@ -1,0 +1,8 @@
+name = "ExtrapolateDR"
+uuid = "8836d0bb-8936-408e-8af5-00b2cd53c994"
+authors = ["Young.Y <yangtze.yuan@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+JAC = "830ae420-d14d-11e8-2f94-6b071437414d"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
