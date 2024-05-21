@@ -273,7 +273,7 @@ module ExtrapolateDR
                     Origin[key][index].resonanceEnergy          = Ed
                     Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
                         for (key2,value2) in Origin[key][index].radRate.component
-                            if readLevel(value2.KeySubshell, fLevel)     # determine which transition type the Pathway corresponds
+                            if readLevel(value2.keySubshell, fLevel)     # determine which transition type the Pathway corresponds
                                 Origin[key][index].radRate.component[key2].Rate  = Origin[key][index].radRate.component[key2].Rate + photonRate
                                 Origin[key][index].radRate.totalRate             = Origin[key][index].radRate.totalRate + photonRate
                             else
