@@ -91,10 +91,10 @@ module ExtrapolateDR
             Return N::Int64
     """
     function readLevel(level::Level)
-        CsfsIndex = argmax(abs.(level.mc))
-        Occupation = level.basis.csfs[CsfsIndex].occupation
-        N_index = maximum(findall(!iszero,Occupation))
-        N = level.basis.subshells[N_index].n
+        CsfsIndex   = argmax(abs.(level.mc))
+        Occupation  = level.basis.csfs[CsfsIndex].occupation
+        N_index     = maximum(findall(!iszero,Occupation))
+        N           = level.basis.subshells[N_index].n
         return N
     end
 
@@ -107,10 +107,10 @@ module ExtrapolateDR
             Return isExist::Bool
     """
     function readLevel(TargetSubshell::Subshell, level::Level)
-        CsfsIndex = argmax(abs.(level.mc))
-        Occupation = level.basis.csfs[CsfsIndex].occupation
+        CsfsIndex    = argmax(abs.(level.mc))
+        Occupation   = level.basis.csfs[CsfsIndex].occupation
         allSubshells = level.basis.subshells[findall(!iszero,Occupation)]
-        isExist = false
+        isExist      = false
         for i = eachindex(allSubshells)
             if allSubshells[i].n != TargetSubshell.n
                 continue
@@ -213,8 +213,8 @@ module ExtrapolateDR
             Return Origin::Dict
     """
     function EmptyOriginalDR(DRSetting::Dict)
-        CaptureSetting      = DRSetting["Capture"]
-        RadSetting   = DRSetting["Transition"]
+        CaptureSetting  = DRSetting["Capture"]
+        RadSetting      = DRSetting["Transition"]
         Origin = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
         for (key, value) in CaptureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
@@ -233,7 +233,7 @@ module ExtrapolateDR
                         type            = value["type"]
                         KeySubshell     = value["KeySubshell"]
                         Rate            = 0.
-                        RadType  = RadType(type, KeySubshell, Rate)
+                        RadType         = RadType(type, KeySubshell, Rate)
                         component[type] = RadType
                     end
                     totalRate           = 0.
@@ -315,8 +315,8 @@ module ExtrapolateDR
             Return Origin::Dict
     """
     function EmptyExtrapolation(DRSetting::Dict)
-        CaptureSetting      = DRSetting["Capture"]
-        RadSetting   = DRSetting["Transition"]
+        CaptureSetting  = DRSetting["Capture"]
+        RadSetting      = DRSetting["Transition"]
         Extrapolation = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
         for (key, value) in CaptureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
@@ -424,7 +424,7 @@ module ExtrapolateDR
     
 
     """
-    `SolveLmax(NVec::Vector{Int64}, DCStrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Float64)`
+    `SolveLmax(NVec::Vector{Int64}, DCstrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Float64)`
 
         ... solve averaged max orbital angular momentum of double-excited state, which is solved by this function:
                 " S_DC = gd / (2gi) * (π^2 * ħ^3 / (me * Eij)) * Aa ",
@@ -434,7 +434,7 @@ module ExtrapolateDR
                 " (Lmax + 1)^2 = gi * Eij * S_DC / (4.95e-30 * (2jc)) ".
             where S_DC derives from sum of all original data's DC strength with same N, Aa is autoionization rate, derives from extrapolation, with corresponding N.
                      NVec : Vector of N. 
-            DCStrengthVec : Vector of S_DC, each S_DC is a sum DCstrength 
+            DCstrengthVec : Vector of S_DC, each S_DC is a sum DCstrength 
                             with same N, N is corresponding to NVec.
              fitAIRateVec : Vector of extrapolated autoionization rate, 
                             N is corresponding to NVec.
@@ -444,9 +444,9 @@ module ExtrapolateDR
 
             return Lmax::Float64
     """
-    function SolveLmax(NVec::Vector{Int64}, DCStrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Int64)
+    function SolveLmax(NVec::Vector{Int64}, DCstrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Int64)
         gi      = ji + 1  # ji is 2j of initial state of DR, and gi is statistic weight 2j + 1 of initial state.    
-        LmaxVec = sqrt.(gi * EdVec .* DCStrengthVec .* NVec.^3 / 4.95e-30 / (jc + 1) / fitAIRateVec) .- 1
+        LmaxVec = sqrt.(gi * EdVec .* DCstrengthVec .* NVec.^3 / 4.95e-30 / (jc + 1) / fitAIRateVec) .- 1
         Lmax    = sum(LmaxVec) / length(LmaxVec)
         return Lmax
     end
@@ -522,13 +522,13 @@ module ExtrapolateDR
             mLevelEnergyVec = Vector{Float64}()
             AIRateVec       = Vector{Float64}()
             TransDict       = Dict{String,Vector{Float64}}()
-            DCStrengthVec   = Vector{Float64}()
+            DCstrengthVec   = Vector{Float64}()
             LmaxVec         = Vector{Float64}()
             for i = eachindex(value1)                
                 push!(NVec            , value1[i].N.num)
                 push!(mLevelEnergyVec , value1[i].mLevelEnergy)
                 push!(AIRateVec       , value1[i].autoionizationRate)
-                push!(DCStrengthVec   , value1[i].DCStrength)
+                push!(DCstrengthVec   , value1[i].DCStrength)
                 push!(LmaxVec         , 0.)
                 for (key2, value2) in value1[i].transitionRate.component
                     if haskey(TransDict, key2)
@@ -540,20 +540,20 @@ module ExtrapolateDR
                 end
             end
             # Now we got all data for fitting, of one capture type.                    
-            FitResult[key1]                             = Dict{String, Any}()
-            FitResult[key1]["Z"]                        = Z
-            FitResult[key1]["i2J"]                       = Origin[key1][1].i2J    # 2j + 1 of initial state
+            FitResult[key1]                     = Dict{String, Any}()
+            FitResult[key1]["Z"]                = Z
+            FitResult[key1]["i2J"]              = Origin[key1][1].i2J    # 2j + 1 of initial state
             # Fit energy level
-            FitResult[key1]["iLevelEnergy"]             = Origin[key1][1].iLevelEnergy
-            FitResult[key1]["EI"]                       = Dict{String, Any}()
-            (fitCoeff, fitFunc)                         = FitLevelEnergy(NVec, mLevelEnergyVec, Z)
-            FitResult[key1]["EI"]["fitCoef"]            = fitCoeff[1]
-            FitResult[key1]["EI"]["fitFunc"]            = fitFunc
+            FitResult[key1]["iLevelEnergy"]     = Origin[key1][1].iLevelEnergy
+            FitResult[key1]["EI"]               = Dict{String, Any}()
+            (fitCoeff, fitFunc)                 = FitLevelEnergy(NVec, mLevelEnergyVec, Z)
+            FitResult[key1]["EI"]["fitCoef"]    = fitCoeff[1]
+            FitResult[key1]["EI"]["fitFunc"]    = fitFunc
             # Fit autoionization rate
-            FitResult[key1]["AI"]                       = Dict{String, Any}()
-            (fitCoeff, fitFunc)                         = FitAIRate(NVec, AIRateVec)
-            FitResult[key1]["AI"]["fitCoef"]            = fitCoeff
-            FitResult[key1]["AI"]["fitFunc"]            = fitFunc
+            FitResult[key1]["AI"]               = Dict{String, Any}()
+            (fitCoeff, fitFunc)                 = FitAIRate(NVec, AIRateVec)
+            FitResult[key1]["AI"]["fitCoef"]    = fitCoeff
+            FitResult[key1]["AI"]["fitFunc"]    = fitFunc
             # Solve Lmax
             #=
             angular momentum quantum number can be obtained by equation:
@@ -567,7 +567,7 @@ module ExtrapolateDR
             ji                                          = FitResult[key1]["i2J"]      # 2j of initial state
             EdVec                                       = mLevelEnergyVec .- value1[1].iLevelEnergy
             fitAIRateVec                                = FitResult[key1]["AI"]["fitCoef"] ./ NVec
-            Lmax                                        = SolveLmax(NVec, DCStrengthVec, fitAIRateVec, EdVec, ji, jc)
+            Lmax                                        = SolveLmax(NVec, DCstrengthVec, fitAIRateVec, EdVec, ji, jc)
             FitResult[key1]["Lmax"]                     = Lmax
             # Fit radiative transition rate
             FitResult[key1]["TR"]                       = Dict{String, Dict}()
@@ -601,14 +601,14 @@ module ExtrapolateDR
         Extrapolation = EmptyExtrapolation(DRSetting)
         for (key1, _) in Extrapolation
             for i = eachindex(Extrapolation[key1])
-                Z                                               = FitResult[key1]["Z"]
-                Ni                                              = Extrapolation[key1][i].N.num
-                Extrapolation[key1][i].i2J                   = FitResult[key1]["i2J"]    # 2j of initial state
-                EI                                              = FitResult[key1]["EI"]["fitCoef"]
-                Extrapolation[key1][i].iLevelEnergy           = FitResult[key1]["iLevelEnergy"]
-                Extrapolation[key1][i].mLevelEnergy           = EI - 13.6057 * Z^2 ./ Ni.^2
-                Extrapolation[key1][i].resonanceEnergy                 = Extrapolation[key1][i].mLevelEnergy - Extrapolation[key1][i].iLevelEnergy
-                Extrapolation[key1][i].autoionizationRate  = FitResult[key1]["AI"]["fitCoef"] / Ni^3
+                Z                                           = FitResult[key1]["Z"]
+                Ni                                          = Extrapolation[key1][i].N.num
+                Extrapolation[key1][i].i2J                  = FitResult[key1]["i2J"]    # 2j of initial state
+                EI                                          = FitResult[key1]["EI"]["fitCoef"]
+                Extrapolation[key1][i].iLevelEnergy         = FitResult[key1]["iLevelEnergy"]
+                Extrapolation[key1][i].mLevelEnergy         = EI - 13.6057 * Z^2 ./ Ni.^2
+                Extrapolation[key1][i].resonanceEnergy      = Extrapolation[key1][i].mLevelEnergy - Extrapolation[key1][i].iLevelEnergy
+                Extrapolation[key1][i].autoionizationRate   = FitResult[key1]["AI"]["fitCoef"] / Ni^3
                 for (key2, _) in Extrapolation[key1][i].transitionRate.component                       
                     if FitResult[key1]["TR"][key2]["fitFunc"] == "Ar = a / n^3"  # fitting function is "Ar = a / n^3"
                         Rate = FitResult[key1]["TR"][key2]["fitCoef"] / Ni^3    
