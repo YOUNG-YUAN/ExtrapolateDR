@@ -9,46 +9,32 @@ module ExtrapolateDR
             FitLevelEnergy, FitAIRate, FitRadRate, FitOriginDR, Extrapolate, ExtrapolateAll
 
 
-
-
-    """
-    `mutable struct QuanmtumDefects`
-
-        ... defines quantum defects which is used for solving level energy.
-
-        + loss   ::Float64   ...quantum defects
-    """
-    mutable struct QuanmtumDefects
-        loss    ::Float64
-    end
-
-
     """
     `mutable struct RadType`
 
-        ... defines de-excitation transition type of DR.
-        + type          ::String    ...which type of this transition
-        + KeySubshell   ::Subshell  ...characteristic subshell of this transition type   
-        + Rate          ::Float64   ...gross transition rate of this transition type
+        ... defines de-excitation radiative transition type of DR.
+        + type          ::String    ...which type of this radiative transition
+        + KeySubshell   ::Subshell  ...characteristic subshell of this radiative transition type   
+        + Rate          ::Float64   ...gross transition rate of this radiative transition type
     """
     mutable struct RadType
         type            ::String
-        KeySubshell     ::Union{Subshell, Vector{Subshell}}
-        Rate            ::Float64
+        keySubshell     ::Union{Subshell, Vector{Subshell}}
+        rate            ::Float64
     end
 
     
     """
-    `mutable struct TransitionRate`
+    `mutable struct RadRate`
     
-        ... defines transition rate of DR which including all de-excitation transition types.
+        ... defines radiative transition rate of DR which including all de-excitation radiative transition types.
 
-        + TotalRate     ::Float64                           ...gross transtion rate of all transition types    
-        + component     ::Dict{String, RadType}      ...which type of this transition
+        + totalRate ::Float64               ...gross radiative transtion rate of all radiative transition types    
+        + component ::Dict{String, RadType} ...which type of this radiative transition
     """
-    mutable struct TransitionRate
-        TotalRate           ::Float64
-        component           ::Dict{String, RadType}
+    mutable struct RadRate
+        totalRate   ::Float64
+        component   ::Dict{String, RadType}
     end
 
     """
@@ -62,7 +48,7 @@ module ExtrapolateDR
         + Energy                ::Float64   ...resonance energy of intermediate state of DR
         + iLevelEnergy          ::Float64   ...resonance energy of initial state of DR
         + mLevelEnergy          ::Float64   ...resonance energy of intermediate(double-excited) state of DR
-        + autoionizationRate    ::Float64   ...autoionization rate of DR.
+        + AutoionizationRate    ::Float64   ...autoionization rate of DR.
         + radRate               ::RadRate   ...radiative rate of DR which including all de-excitation transition types.
         + DCStrength            ::Float64   ...dielectronic capture strength of DR
         + branchRate            ::Float64   ...branchrate of DR
@@ -76,7 +62,7 @@ module ExtrapolateDR
         mLevelEnergy        ::Float64
         resonanceEnergy     ::Float64
         autoionizationRate  ::Float64
-        transitionRate      ::TransitionRate
+        radRate             ::RadRate
         DCStrength          ::Float64
         branchRate          ::Float64
         DRStrength          ::Float64
@@ -185,18 +171,18 @@ module ExtrapolateDR
         CaptureSetting      = Dict{Subshell, Dict}()
         for i = eachindex(SetCaptureType)
             # [[Subshell,10,11,115]]
-            KeySubshell     = SetCaptureType[i][1]
+            keySubshell     = SetCaptureType[i][1]
             startN          = SetCaptureType[i][2]
             endN            = SetCaptureType[i][3]
             extrapolateN    = SetCaptureType[i][4]
-            CaptureSetting[KeySubshell] = Dict("KeySubshell" => KeySubshell, "startN" => startN, "endN" => endN, "extrapolateN" => extrapolateN)
+            CaptureSetting[keySubshell] = Dict("KeySubshell" => keySubshell, "startN" => startN, "endN" => endN, "extrapolateN" => extrapolateN)
         end
         RadSetting   = Dict{String, Dict}()
         for i = eachindex(SetRadType)
             # [["type1",Subshell]]
             type            = SetRadType[i][1]
-            KeySubshell     = SetRadType[i][2]
-            RadSetting[type] = Dict("type" => type, "KeySubshell" => KeySubshell)
+            keySubshell     = SetRadType[i][2]
+            RadSetting[type] = Dict("type" => type, "KeySubshell" => keySubshell)
         end
         DRSetting = Dict("Capture" => CaptureSetting, "Transition" => RadSetting)
         return DRSetting
@@ -213,10 +199,10 @@ module ExtrapolateDR
             Return Origin::Dict
     """
     function EmptyOriginalDR(DRSetting::Dict)
-        CaptureSetting  = DRSetting["Capture"]
-        RadSetting      = DRSetting["Transition"]
+        captureSetting  = DRSetting["Capture"]
+        radSetting      = DRSetting["Transition"]
         Origin = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
-        for (key, value) in CaptureSetting  # CaptureSetting includes all capture types
+        for (key, value) in captureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
             startN              = value["startN"]
             endN                = value["endN"]
@@ -231,13 +217,13 @@ module ExtrapolateDR
                     component           = Dict{String,RadType}()
                     for (key, value)    = RadSetting        # Each key corresponds a type.
                         type            = value["type"]
-                        KeySubshell     = value["KeySubshell"]
-                        Rate            = 0.
-                        RadType         = RadType(type, KeySubshell, Rate)
+                        keySubshell     = value["KeySubshell"]
+                        rate            = 0.
+                        radType         = RadType(type, keySubshell, Rate)
                         component[type] = RadType
                     end
-                    totalRate           = 0.
-                radRate             = RadRate(totalRate, component)
+                    totRate           = 0.
+                radRate             = RadRate(totRate, component)
                 DCStrength          = 0.
                 branchRate          = 0.
                 DRStrength          = 0.
@@ -286,10 +272,10 @@ module ExtrapolateDR
                     end
                     Origin[key][index].resonanceEnergy          = Ed
                     Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
-                        for (key2,value2) in Origin[key][index].transitionRate.component
+                        for (key2,value2) in Origin[key][index].radRate.component
                             if readLevel(value2.KeySubshell, fLevel)     # determine which transition type the Pathway corresponds
-                                Origin[key][index].transitionRate.component[key2].Rate  = Origin[key][index].transitionRate.component[key2].Rate + photonRate
-                                Origin[key][index].transitionRate.TotalRate             = Origin[key][index].transitionRate.TotalRate + photonRate
+                                Origin[key][index].radRate.component[key2].Rate  = Origin[key][index].radRate.component[key2].Rate + photonRate
+                                Origin[key][index].radRate.totalRate             = Origin[key][index].radRate.totalRate + photonRate
                             else
                                 continue
                             end
@@ -315,10 +301,10 @@ module ExtrapolateDR
             Return Origin::Dict
     """
     function EmptyExtrapolation(DRSetting::Dict)
-        CaptureSetting  = DRSetting["Capture"]
-        RadSetting      = DRSetting["Transition"]
+        captureSetting  = DRSetting["Capture"]
+        radSetting      = DRSetting["Transition"]
         Extrapolation = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
-        for (key, value) in CaptureSetting  # CaptureSetting includes all capture types
+        for (key, value) in captureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
             startN              = value["endN"] + 1     # calculated from "startN" to "endN", so extrapolation is from "endN"+1 to "extrapolateN".
             endN                = value["extrapolateN"]
@@ -331,15 +317,15 @@ module ExtrapolateDR
                 resonanceEnergy     = 0.
                 autoionizationRate  = 0.
                     component           = Dict{String,RadType}()
-                    for (key, value)    = RadSetting        # Each key corresponds a type.
+                    for (key, value)    = radSetting        # Each key corresponds a type.
                         type            = value["type"]
-                        KeySubshell     = value["KeySubshell"]
-                        Rate            = 0.
-                        RadType  = RadType(type, KeySubshell, Rate)
-                        component[type] = RadType
+                        keySubshell     = value["KeySubshell"]
+                        rate            = 0.
+                        radType  = RadType(type, keySubshell, rate)
+                        component[type] = radType
                     end
                     totalRate           = 0.
-                transitionRate      = TransitionRate(totalRate, component)
+                radRate             = RadRate(totalRate, component)
                 DCStrength          = 0.
                 branchRate          = 0.
                 DRStrength          = 0.
@@ -530,7 +516,7 @@ module ExtrapolateDR
                 push!(AIRateVec       , value1[i].autoionizationRate)
                 push!(DCstrengthVec   , value1[i].DCStrength)
                 push!(LmaxVec         , 0.)
-                for (key2, value2) in value1[i].transitionRate.component
+                for (key2, value2) in value1[i].radRate.component
                     if haskey(TransDict, key2)
                         push!(TransDict[key2], value2.Rate)
                     else
@@ -609,14 +595,14 @@ module ExtrapolateDR
                 Extrapolation[key1][i].mLevelEnergy         = EI - 13.6057 * Z^2 ./ Ni.^2
                 Extrapolation[key1][i].resonanceEnergy      = Extrapolation[key1][i].mLevelEnergy - Extrapolation[key1][i].iLevelEnergy
                 Extrapolation[key1][i].autoionizationRate   = FitResult[key1]["AI"]["fitCoef"] / Ni^3
-                for (key2, _) in Extrapolation[key1][i].transitionRate.component                       
+                for (key2, _) in Extrapolation[key1][i].radRate.component                       
                     if FitResult[key1]["TR"][key2]["fitFunc"] == "Ar = a / n^3"  # fitting function is "Ar = a / n^3"
                         Rate = FitResult[key1]["TR"][key2]["fitCoef"] / Ni^3    
                     else  # fitting function is "Ar = b"
                         Rate = FitResult[key1]["TR"][key2]["fitCoef"]
                     end
-                    Extrapolation[key1][i].transitionRate.component[key2].Rate  = Rate
-                    Extrapolation[key1][i].transitionRate.TotalRate             = Extrapolation[key1][i].transitionRate.TotalRate + Rate
+                    Extrapolation[key1][i].radRate.component[key2].Rate  = Rate
+                    Extrapolation[key1][i].radRate.totalRate             = Extrapolation[key1][i].radRate.totalRate + Rate
                 end
                 #=
                 angular momentum quantum number can be obtained by equation:
@@ -631,7 +617,7 @@ module ExtrapolateDR
                 gi      = Extrapolation[key1][i].i2J + 1
                 Ed      = Extrapolation[key1][i].resonanceEnergy
                 Aa      = Extrapolation[key1][i].autoionizationRate
-                Ar      = Extrapolation[key1][i].transitionRate.TotalRate
+                Ar      = Extrapolation[key1][i].radRate.totalRate
                 Extrapolation[key1][i].DCStrength   = 4.95e-30 * (2 * jc + 1) * (Lmax + 1)^2 * Aa / gi / Ed
                 Extrapolation[key1][i].branchRate   = Ar / (Aa + Ar)
                 Extrapolation[key1][i].DRStrength   = Extrapolation[key1][i].DCStrength * Extrapolation[key1][i].branchRate
