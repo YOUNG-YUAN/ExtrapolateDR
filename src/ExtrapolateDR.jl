@@ -274,7 +274,7 @@ module ExtrapolateDR
                     Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
                         for (key2,value2) in Origin[key][index].radRate.component
                             if readLevel(value2.keySubshell, fLevel)     # determine which transition type the Pathway corresponds
-                                Origin[key][index].radRate.component[key2].Rate  = Origin[key][index].radRate.component[key2].Rate + photonRate
+                                Origin[key][index].radRate.component[key2].rate  = Origin[key][index].radRate.component[key2].rate + photonRate
                                 Origin[key][index].radRate.totalRate             = Origin[key][index].radRate.totalRate + photonRate
                             else
                                 continue
@@ -518,10 +518,10 @@ module ExtrapolateDR
                 push!(LmaxVec         , 0.)
                 for (key2, value2) in value1[i].radRate.component
                     if haskey(TransDict, key2)
-                        push!(TransDict[key2], value2.Rate)
+                        push!(TransDict[key2], value2.rate)
                     else
                         TransDict[key2] = Vector{Float64}()
-                        push!(TransDict[key2], value2.Rate)
+                        push!(TransDict[key2], value2.rate)
                     end
                 end
             end
@@ -601,7 +601,7 @@ module ExtrapolateDR
                     else  # fitting function is "Ar = b"
                         Rate = FitResult[key1]["TR"][key2]["fitCoef"]
                     end
-                    Extrapolation[key1][i].radRate.component[key2].Rate  = Rate
+                    Extrapolation[key1][i].radRate.component[key2].rate  = Rate
                     Extrapolation[key1][i].radRate.totalRate             = Extrapolation[key1][i].radRate.totalRate + Rate
                 end
                 #=
