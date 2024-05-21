@@ -16,8 +16,8 @@ resultWidth = Vector{Float64}()
 
 for (key, value) in Extrapolation
     for i = eachindex(value)
-        push!(resultE, Extrapolation[key][i].Energy.E)
-        push!(resultDR, Extrapolation[key][i].DR.strength)
+        push!(resultE, Extrapolation[key][i].resonanceEnergy)
+        push!(resultDR, Extrapolation[key][i].DRStrength)
         push!(resultWidth, 0.0)
     end
 end
