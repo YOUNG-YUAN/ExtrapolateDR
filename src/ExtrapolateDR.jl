@@ -215,12 +215,12 @@ module ExtrapolateDR
                 resonanceEnergy     = 0.
                 autoionizationRate  = 0.
                     component           = Dict{String,RadType}()
-                    for (key, value)    = RadSetting        # Each key corresponds a type.
+                    for (key, value)    = radSetting        # Each key corresponds a type.
                         type            = value["type"]
                         keySubshell     = value["KeySubshell"]
                         rate            = 0.
-                        radType         = RadType(type, keySubshell, Rate)
-                        component[type] = RadType
+                        radType         = RadType(type, keySubshell, rate)
+                        component[type] = radType
                     end
                     totRate           = 0.
                 radRate             = RadRate(totRate, component)
@@ -253,8 +253,8 @@ module ExtrapolateDR
             iLevel          = DR[i].initialLevel
             mLevel          = DR[i].intermediateLevel
             fLevel          = DR[i].finalLevel
-            iLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", iLevel.resonanceEnergy)
-            mLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", mLevel.resonanceEnergy)
+            iLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", iLevel.energy)
+            mLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", mLevel.energy)
             Ed              = Defaults.convertUnits("energy: from atomic to eV", DR[i].electronEnergy)
             captureRate     = Defaults.convertUnits("rate: from atomic", DR[i].captureRate) 
             photonRate      = Defaults.convertUnits("rate: from atomic", DR[i].photonRate.Coulomb)
@@ -329,7 +329,7 @@ module ExtrapolateDR
                 DCStrength          = 0.
                 branchRate          = 0.
                 DRStrength          = 0.
-                push!(emptyDRdataVector, DRdata(N, Nloss, i2J, iLevelEnergy, mLevelEnergy, resonanceEnergy, autoionizationRate, transitionRate, DCStrength, branchRate, DRStrength))
+                push!(emptyDRdataVector, DRdata(N, Nloss, i2J, iLevelEnergy, mLevelEnergy, resonanceEnergy, autoionizationRate, radRate, DCStrength, branchRate, DRStrength))
             end
             Extrapolation[key]         = emptyDRdataVector
         end
