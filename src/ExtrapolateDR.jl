@@ -511,7 +511,7 @@ module ExtrapolateDR
             DCstrengthVec   = Vector{Float64}()
             LmaxVec         = Vector{Float64}()
             for i = eachindex(value1)                
-                push!(NVec            , value1[i].N.num)
+                push!(NVec            , value1[i].N)
                 push!(mLevelEnergyVec , value1[i].mLevelEnergy)
                 push!(AIRateVec       , value1[i].autoionizationRate)
                 push!(DCstrengthVec   , value1[i].DCStrength)
@@ -588,7 +588,7 @@ module ExtrapolateDR
         for (key1, _) in Extrapolation
             for i = eachindex(Extrapolation[key1])
                 Z                                           = FitResult[key1]["Z"]
-                Ni                                          = Extrapolation[key1][i].N.num
+                Ni                                          = Extrapolation[key1][i].N
                 Extrapolation[key1][i].i2J                  = FitResult[key1]["i2J"]    # 2j of initial state
                 EI                                          = FitResult[key1]["EI"]["fitCoef"]
                 Extrapolation[key1][i].iLevelEnergy         = FitResult[key1]["iLevelEnergy"]
