@@ -2,8 +2,7 @@ module ExtrapolateDR
 
     using JAC, Optim
 
-    export  Int64, QuanmtumDefects, resonanceEnergy, LevelEnergy, AutoionizationRate, RadType, 
-            TransitionRate, DCstrength, branchRate, DRstrength, DRdata
+    export  RadType, RadRate, DRdata
 
     export  readLevel, SetDR, EmptyOriginalDR, OriginalDR, EmptyExtrapolation, SolveLmax, SolveQuantumDefects, 
             FitLevelEnergy, FitAIRate, FitRadRate, FitOriginDR, Extrapolate, ExtrapolateAll
@@ -160,10 +159,11 @@ module ExtrapolateDR
             In short, from your calculated DR data, your N = 10~20 for 2p_1/2, and you want to extrapolate 2p_1/2 to N = 115.
             [Subshell(2,-2), 10, 20, 115] is for 2p_3/2, similar to [Subshell(2,-2), 10, 20, 115], which means you calculated N = 12~22 for 2p_3/2, and you want to extrapolate 2p_3/2 to N = 120.
 
-            SetRadType = [["typeI", Subshell(2,-1)], ["typeII"], [Subshell(2,1), Subshell(2,-2)]]
+            SetRadType = [[Subshell(2,-1)], [Subshell(2,1), Subshell(2,-2)]]
 
-            If a final state of DR includes Subshell(2,-1), then the de-excitation transition from double-excited state to this final state is "typeI".
-            Similarly, if a final state of DR includes one of Subshell from [Subshell(2,1), Subshell(2,-2)], then it's "typeII".
+            First vector is of typeI, second vector is of type II. If a final state of DR includes Subshell(2,-1), then the 
+            de-excitation transition from double-excited state to this final state is "typeI". Similarly, if a final state of 
+            DR includes one of Subshell from [Subshell(2,1), Subshell(2,-2)], then it's "typeII".
 
             Return DRSetting::Dict
     """
@@ -180,8 +180,8 @@ module ExtrapolateDR
         RadSetting   = Dict{String, Dict}()
         for i = eachindex(SetRadType)
             # [["type1",Subshell]]
-            type            = SetRadType[i][1]
-            keySubshell     = SetRadType[i][2]
+            type            = i == 1 ? "typeI" : "typeII"
+            keySubshell     = SetRadType[i]
             RadSetting[type] = Dict("type" => type, "KeySubshell" => keySubshell)
         end
         DRSetting = Dict("Capture" => CaptureSetting, "Transition" => RadSetting)
