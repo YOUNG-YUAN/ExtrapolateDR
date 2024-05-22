@@ -5,7 +5,7 @@ using ExtrapolateDR
 data = load("C:\\Users\\Young.Y\\Documents\\Julia_old\\2p_n10-20 DR.jld2")
 DR = data["wb"]["dielectronic recombination pathways:"]
 
-DRSetting   = SetDR([[Subshell(2,1),10,20,115],[Subshell(2,-2),10,20,115]], [["typeI",Subshell(2,-1)],["typeII",[Subshell(2,1),Subshell(2,-2)]]])
+DRSetting   = SetDR([[Subshell(2,1),10,20,115],[Subshell(2,-2),10,20,115]], [Subshell(2,-1),[Subshell(2,1),Subshell(2,-2)]])
 Origin      = OriginalDR(DR, DRSetting)
 FitResult   = FitOriginDR(Origin, 15)
 Extrapolation = Extrapolate(DRSetting, FitResult)

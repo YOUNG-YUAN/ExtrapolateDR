@@ -159,7 +159,7 @@ module ExtrapolateDR
             In short, from your calculated DR data, your N = 10~20 for 2p_1/2, and you want to extrapolate 2p_1/2 to N = 115.
             [Subshell(2,-2), 10, 20, 115] is for 2p_3/2, similar to [Subshell(2,-2), 10, 20, 115], which means you calculated N = 12~22 for 2p_3/2, and you want to extrapolate 2p_3/2 to N = 120.
 
-            SetRadType = [[Subshell(2,-1)], [Subshell(2,1), Subshell(2,-2)]]
+            SetRadType = [Subshell(2,-1), [Subshell(2,1), Subshell(2,-2)]]
 
             First vector is of typeI, second vector is of type II. If a final state of DR includes Subshell(2,-1), then the 
             de-excitation transition from double-excited state to this final state is "typeI". Similarly, if a final state of 
@@ -184,7 +184,7 @@ module ExtrapolateDR
             keySubshell     = SetRadType[i]
             RadSetting[type] = Dict("type" => type, "KeySubshell" => keySubshell)
         end
-        DRSetting = Dict("Capture" => CaptureSetting, "Transition" => RadSetting)
+        DRSetting = Dict("Capture" => CaptureSetting, "Radiative" => RadSetting)
         return DRSetting
     end
 
@@ -200,7 +200,7 @@ module ExtrapolateDR
     """
     function EmptyOriginalDR(DRSetting::Dict)
         captureSetting  = DRSetting["Capture"]
-        radSetting      = DRSetting["Transition"]
+        radSetting      = DRSetting["Radiative"]
         Origin = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
         for (key, value) in captureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
@@ -302,7 +302,7 @@ module ExtrapolateDR
     """
     function EmptyExtrapolation(DRSetting::Dict)
         captureSetting  = DRSetting["Capture"]
-        radSetting      = DRSetting["Transition"]
+        radSetting      = DRSetting["Radiative"]
         Extrapolation = Dict{Subshell, Vector{DRdata}}()  # create an empty Dict for saving original DR data.
         for (key, value) in captureSetting  # CaptureSetting includes all capture types
             emptyDRdataVector   = Vector{DRdata}()
