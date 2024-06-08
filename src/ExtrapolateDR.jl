@@ -632,7 +632,7 @@ module ExtrapolateDR
                 Ed      = Extrapolation[key1][i].resonanceEnergy
                 Aa      = Extrapolation[key1][i].autoionizationRate
                 Ar      = Extrapolation[key1][i].radRate.totalRate
-                Extrapolation[key1][i].DCStrength   = 4.95e-30 * (2 * jc + 1) * (Lmax + 1)^2 * Aa / gi / Ed
+                Extrapolation[key1][i].DCStrength   = 4.95e-30 * (jc + 1) * (Lmax + 1)^2 * Aa / gi / Ed
                 Extrapolation[key1][i].branchRate   = Ar / (Aa + Ar)
                 Extrapolation[key1][i].DRStrength   = Extrapolation[key1][i].DCStrength * Extrapolation[key1][i].branchRate
             end
