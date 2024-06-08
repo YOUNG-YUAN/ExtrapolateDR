@@ -245,7 +245,7 @@ module ExtrapolateDR
     """
     function OriginalDR(DR::Vector{JAC.Dielectronic.Pathway}, DRSetting::Dict)      
         Origin = EmptyOriginalDR(DRSetting) # create an empty Dict for saving original DR data.
-        # mLevelIndexBox = Vector{Int64}()
+        mLevelIndexBox = Vector{Int64}()
         for i = eachindex(DR)
             if DR[i].photonRate.Coulomb == 0.0  # if photonRate = 0.0, that means this JAC.Dielectronic.Pathway is invalid.
                 continue
@@ -255,7 +255,7 @@ module ExtrapolateDR
             i2J             = DR[i].initialLevel.J.den == 1 ? 2 * DR[i].initialLevel.J.num : DR[i].initialLevel.J.num  # 2j of initial state  
             mLevel          = DR[i].intermediateLevel
             m2J             = DR[i].intermediateLevel.J.den == 1 ? 2 * DR[i].intermediateLevel.J.num : DR[i].intermediateLevel.J.num
-            # mLevelIndex     = DR[i].intermediateLevel.index
+            mLevelIndex     = DR[i].intermediateLevel.index
             fLevel          = DR[i].finalLevel
             iLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", iLevel.energy)
             mLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", mLevel.energy)
@@ -275,14 +275,14 @@ module ExtrapolateDR
                         Origin[key][index].mLevelEnergy         = max(mLevelEnergy, Origin[key][index].mLevelEnergy)  # the max mLevelEnergy would be saved, because which is low-quanmtum-defects.
                     end
                     Origin[key][index].resonanceEnergy          = Ed
-                    # if mLevelIndex in mLevelIndexBox
-                    #     Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate
-                    #     Origin[key][index].DCStrength = Origin[key][index].DCStrength
-                    # else       
+                    if mLevelIndex in mLevelIndexBox
+                        Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate
+                        Origin[key][index].DCStrength = Origin[key][index].DCStrength
+                    else       
                         Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
                         Origin[key][index].DCStrength = Origin[key][index].DCStrength + 4.95e-30 * (m2J + 1) / (2 * i2J + 2) / Ed * captureRate
-                    #     push!(mLevelIndexBox, mLevelIndex)
-                    # end
+                        push!(mLevelIndexBox, mLevelIndex)
+                    end
                         for (key2,value2) in Origin[key][index].radRate.component
                             if readLevel(value2.keySubshell, fLevel)     # determine which transition type the Pathway corresponds
                                 Origin[key][index].radRate.component[key2].rate  = Origin[key][index].radRate.component[key2].rate + photonRate
