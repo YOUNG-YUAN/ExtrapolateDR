@@ -442,7 +442,7 @@ module ExtrapolateDR
     """
     function SolveLmax(NVec::Vector{Int64}, DCstrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Int64)
         gi      = ji + 1  # ji is 2j of initial state of DR, and gi is statistic weight 2j + 1 of initial state.    
-        LmaxVec = sqrt.(2 * gi .* DCstrengthVec .* EdVec / 4.95e-30 / (jc + 1) ./ fitAIRateVec) .- 1
+        LmaxVec = sqrt.(gi .* DCstrengthVec .* EdVec / 4.95e-30 / (jc + 1) ./ fitAIRateVec) .- 1
         Lmax    = sum(LmaxVec) / length(LmaxVec)
         return Lmax
     end
