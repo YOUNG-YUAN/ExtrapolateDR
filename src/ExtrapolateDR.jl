@@ -444,6 +444,7 @@ module ExtrapolateDR
         gi      = ji + 1  # ji is 2j of initial state of DR, and gi is statistic weight 2j + 1 of initial state.    
         LmaxVec = sqrt.(gi * EdVec .* DCstrengthVec .* NVec.^3 / 4.95e-30 / (jc + 1) / fitAIRateVec) .- 1
         Lmax    = sum(LmaxVec) / length(LmaxVec)
+        Lmax = 0.0  # Will be considered later
         return Lmax
     end
     
