@@ -252,7 +252,9 @@ module ExtrapolateDR
             end
             # Transfer Units
             iLevel          = DR[i].initialLevel
+            i2J             = DR[i].initialLevel.J.den == 1 ? 2 * DR[i].initialLevel.J.num : DR[i].initialLevel.J.num
             mLevel          = DR[i].intermediateLevel
+            m2J             = DR[i].intermediateLevel.J.den == 1 ? 2 * DR[i].intermediateLevel.J.num : DR[i].intermediateLevel.J.num
             mLevelIndex     = DR[i].intermediateLevel.index
             fLevel          = DR[i].finalLevel
             iLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", iLevel.energy)
