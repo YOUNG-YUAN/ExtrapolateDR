@@ -446,6 +446,13 @@ module ExtrapolateDR
         # Lmax    = sum(LmaxVec) / length(LmaxVec)
         # Lmax = 0.0  # Will be considered later
         gf      = jc + 1
+        if gi < 0
+            error("gi < 0")
+        elseif NVec < 0
+            error("N < 0")
+        elseif gf < 0
+            error("gf < 0")
+        end
         LmaxVec = sqrt(2 * gi .* DCstrengthVec .* NVec.^3 / 4.95e-30 / gf / fitAIRateVec) .- 1
         Lmax    = sum(LmaxVec) / length(LmaxVec)
         return Lmax
