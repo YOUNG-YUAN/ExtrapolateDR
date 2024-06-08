@@ -275,8 +275,10 @@ module ExtrapolateDR
                     Origin[key][index].resonanceEnergy          = Ed
                     if mLevelIndex in mLevelIndexBox
                         Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate
+                        Origin[key][index].DCStrength = Origin[key][index].DCStrength
                     else       
                         Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
+                        Origin[key][index].DCStrength = Origin[key][index].DCStrength + 4.95e-30 * (mLevel.J.num + 1) / (2 * iLevel.J.num + 2) / Ed * captureRate
                         push!(mLevelIndexBox, mLevelIndex)
                     end
                         for (key2,value2) in Origin[key][index].radRate.component
@@ -286,8 +288,7 @@ module ExtrapolateDR
                             else
                                 continue
                             end
-                        end
-                    Origin[key][index].DCStrength = Origin[key][index].DCStrength + 4.95e-30 * (mLevel.J.num + 1) / (2 * iLevel.J.num + 2) / Ed * captureRate
+                        end       
                     # Branch and DR would not change, keep them zeros, because we don't need them.
                 else
                     continue
