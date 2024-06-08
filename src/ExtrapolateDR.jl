@@ -245,6 +245,7 @@ module ExtrapolateDR
     """
     function OriginalDR(DR::Vector{JAC.Dielectronic.Pathway}, DRSetting::Dict)      
         Origin = EmptyOriginalDR(DRSetting) # create an empty Dict for saving original DR data.
+        mLevelIndexBox = Vector{Int64}()
         for i = eachindex(DR)
             if DR[i].photonRate.Coulomb == 0.0  # if photonRate = 0.0, that means this JAC.Dielectronic.Pathway is invalid.
                 continue
@@ -252,6 +253,7 @@ module ExtrapolateDR
             # Transfer Units
             iLevel          = DR[i].initialLevel
             mLevel          = DR[i].intermediateLevel
+            mLevelIndex     = DR[i].intermediateLevel.index
             fLevel          = DR[i].finalLevel
             iLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", iLevel.energy)
             mLevelEnergy    = Defaults.convertUnits("energy: from atomic to eV", mLevel.energy)
@@ -271,7 +273,12 @@ module ExtrapolateDR
                         Origin[key][index].mLevelEnergy         = max(mLevelEnergy, Origin[key][index].mLevelEnergy)  # the max mLevelEnergy would be saved, because which is low-quanmtum-defects.
                     end
                     Origin[key][index].resonanceEnergy          = Ed
-                    Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
+                    if mLevelIndex in mLevelIndexBox
+                        Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate
+                    else       
+                        Origin[key][index].autoionizationRate  = Origin[key][index].autoionizationRate + captureRate
+                        push!(mLevelIndexBox, mLevelIndex)
+                    end
                         for (key2,value2) in Origin[key][index].radRate.component
                             if readLevel(value2.keySubshell, fLevel)     # determine which transition type the Pathway corresponds
                                 Origin[key][index].radRate.component[key2].rate  = Origin[key][index].radRate.component[key2].rate + photonRate
