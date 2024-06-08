@@ -288,8 +288,7 @@ module ExtrapolateDR
                             else
                                 continue
                             end
-                        end
-                    
+                        end            
                     # Branch and DR would not change, keep them zeros, because we don't need them.
                 else
                     continue
