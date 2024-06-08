@@ -442,9 +442,7 @@ module ExtrapolateDR
     """
     function SolveLmax(NVec::Vector{Int64}, DCstrengthVec::Vector{Float64}, fitAIRateVec::Vector{Float64}, EdVec::Vector{Float64}, ji:: Int64, jc::Int64)
         gi      = ji + 1  # ji is 2j of initial state of DR, and gi is statistic weight 2j + 1 of initial state.    
-        # LmaxVec = sqrt.(gi * EdVec .* DCstrengthVec .* NVec.^3 / 4.95e-30 / (jc + 1) / fitAIRateVec) .- 1
-        
-        LmaxVec = sqrt(2 * gi .* DCstrengthVec .* NVec.^3 / 4.95e-30 / (jc + 1) / fitAIRateVec) .- 1
+        LmaxVec = sqrt.(2 * gi .* DCstrengthVec / 4.95e-30 / (jc + 1) ./ fitAIRateVec) .- 1
         Lmax    = sum(LmaxVec) / length(LmaxVec)
         return Lmax
     end
@@ -564,7 +562,7 @@ module ExtrapolateDR
             jc                                          = key1.kappa > 0 ? 2 * key1.kappa - 1 : -2 * key1.kappa - 1
             ji                                          = FitResult[key1]["i2J"]      # 2j of initial state
             EdVec                                       = mLevelEnergyVec .- value1[1].iLevelEnergy
-            fitAIRateVec                                = FitResult[key1]["AI"]["fitCoef"] ./ NVec
+            fitAIRateVec                                = FitResult[key1]["AI"]["fitCoef"] ./ NVec.^3
             Lmax                                        = SolveLmax(NVec, DCstrengthVec, fitAIRateVec, EdVec, ji, jc)
             FitResult[key1]["Lmax"]                     = Lmax
             # Fit radiative transition rate
